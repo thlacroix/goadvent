@@ -96,7 +96,7 @@ var opscodes = []Opscode{
 		},
 	},
 	Opscode{
-		Name: "gitr",
+		Name: "gtir",
 		Func: func(registers [4]int, inputa int, inputb int, output int) [4]int {
 			result := registers
 			var value int
