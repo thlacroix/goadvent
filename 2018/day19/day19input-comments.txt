@@ -1,0 +1,37 @@
+#ip 5
+addi 5 16 5
+seti 1 9 1
+seti 1 5 4 inc goes back to 1
+mulr 1 4 3 multiplies inc with multiplier
+eqrr 3 2 3 checks if result is equal to target
+addr 3 5 5 moves two targets below if above is true
+addi 5 1 5 if false, skip next one
+addr 1 0 0 if true, increments first counter
+addi 4 1 4 increase inc
+gtrr 4 2 3 checks that it's not above the target
+addr 5 3 5 moving based on result above
+seti 2 4 5 if false, loop
+addi 1 1 1 if true, increase multiplier
+gtrr 1 2 3 check that it's not above target
+addr 3 5 5 move based on above
+seti 1 9 5 if false, go to instruction 2
+mulr 5 5 5 if true, stops
+addi 2 2 2
+mulr 2 2 2
+mulr 5 2 2
+muli 2 11 2
+addi 3 8 3
+mulr 3 5 3
+addi 3 16 3
+addr 2 3 2
+addr 5 0 5
+seti 0 7 5
+setr 5 3 3
+mulr 3 5 3
+addr 5 3 3
+mulr 5 3 3
+muli 3 14 3
+mulr 3 5 3
+addr 2 3 2
+seti 0 1 0
+seti 0 6 5
