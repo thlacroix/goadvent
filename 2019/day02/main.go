@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	ints, err := getInts("day01input.txt")
+	ints, err := getInts("day02input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
