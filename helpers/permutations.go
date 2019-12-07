@@ -11,13 +11,14 @@ func Permute(values []int) [][]int {
 			copy(tempCopy, s)
 			permutations = append(permutations, tempCopy)
 		} else {
-			for i := 0; i < k; i++ {
-				heap(k-1, s)
+			heap(k-1, s)
+			for i := 0; i < k-1; i++ {
 				if k%2 == 0 {
 					s[i], s[k-1] = s[k-1], s[i]
 				} else {
 					s[0], s[k-1] = s[k-1], s[0]
 				}
+				heap(k-1, s)
 			}
 
 		}
