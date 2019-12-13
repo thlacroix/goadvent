@@ -61,6 +61,7 @@ type Game struct {
 
 // Print pretty print the game
 func (g *Game) Print() {
+	fmt.Printf("\033[0;0H") // comment the line if not using an ANSI terminal
 	for _, l := range g.Map {
 		for _, t := range l {
 			c := '.'

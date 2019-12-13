@@ -51,6 +51,34 @@ func (m *Machine) GetOuput() int {
 	return <-m.Output
 }
 
+// GetOutputOrAddInputOrEnd either adds and input (and return the first bool as true),
+// get an output, or signal the end of the program (last bool as true)
+func (m *Machine) GetOutputOrAddInputOrEnd(i int) (int, bool, bool) {
+	for {
+		select {
+		case m.Input <- i:
+			return 0, true, false
+		case o := <-m.Output:
+			return o, false, false
+		case <-m.Done:
+			return 0, false, true
+		}
+	}
+}
+
+// GetOuputOrEnd returns the first available ouput from the Output channel,
+// and true if the machine exited
+func (m *Machine) GetOuputOrEnd() (int, bool) {
+	for {
+		select {
+		case o := <-m.Output:
+			return o, false
+		case <-m.Done:
+			return 0, true
+		}
+	}
+}
+
 // Run runs the machine, and sends a signal on the Done chan when done
 func (m *Machine) Run() {
 	for m.Index < len(m.Ints) {
