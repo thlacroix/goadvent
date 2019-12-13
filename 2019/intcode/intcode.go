@@ -56,10 +56,10 @@ func (m *Machine) GetOuput() int {
 func (m *Machine) GetOutputOrAddInputOrEnd(i int) (int, bool, bool) {
 	for {
 		select {
-		case m.Input <- i:
-			return 0, true, false
 		case o := <-m.Output:
 			return o, false, false
+		case m.Input <- i:
+			return 0, true, false
 		case <-m.Done:
 			return 0, false, true
 		}

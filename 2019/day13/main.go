@@ -104,7 +104,7 @@ type Point struct {
 // Uncomment the game.Print() lines if you want to visualize the game
 func playGame(ints []int) int {
 	game := &Game{}
-	m := intcode.NewBufferedMachine(ints, 0, 0)
+	m := intcode.NewBufferedMachine(ints, 0, 2)
 	go m.Run()
 
 	for {
