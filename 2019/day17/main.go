@@ -18,16 +18,22 @@ func main() {
 	}
 	scaffold, robot := getScaffold(ints)
 	count := countIntersects(scaffold)
-	fmt.Println(getScaffoldMoves(scaffold, robot))
+	moves := getScaffoldMoves(scaffold, robot)
+	moves = moves[2 : len(moves)-1]
 
-	// generating the compression sequences manually, using vs code,
-	// from the move sequence generated above
-	mainRoutine := "A,B,A,C,B,C,B,A,C,B"
-	A := "L,10,L,6,R,10"
-	B := "R,6,R,8,R,8,L,6,R,8"
-	C := "L,10,R,8,R,8,L,10"
+	mainRoutine, functions := compress(moves)
+	fmt.Println("Moves:", moves)
+	fmt.Println("Main routine:", mainRoutine)
+	fmt.Println("Functions:", functions)
+
+	// I initially did the compression manually with vs code, and later
+	// proceeded to automate the process.
+	// Keeping the values manually found below:
+	// mainRoutine := "A,B,A,C,B,C,B,A,C,B"
+	// functions := [3]string{"L,10,L,6,R,10", "R,6,R,8,R,8,L,6,R,8", "L,10,R,8,R,8,L,10"}
+
 	ints[0] = 2
-	dust := moveOnScaffold(ints, mainRoutine, A, B, C)
+	dust := moveOnScaffold(ints, mainRoutine, functions)
 	fmt.Println(count)
 	fmt.Println(dust)
 }
@@ -211,14 +217,109 @@ func printScaffold(scaffold [][]int) {
 	}
 }
 
-func moveOnScaffold(ints []int, mainRoutine, A, B, C string) int {
+// Algorithm to compress the sequence of moves, which could
+// probably done in a more simple / elegant way, but this works fast.
+// The main idea behind it is that it will take a substring at the
+// beginning of the input, then will check if this pattern is repeated
+// directly after itself.
+// It then takes a substring after the first one, does the same process,
+// and takes a third substring. It takes max 20 characters for each substring.
+// Once we have the three substrings, we proceed on the string by searching if
+// the next sequence of characters could be replaced by one of the substrings.
+// One additional difficulty is the role of the ',', as we need to offset it.
+// !!! There are probably some edge cases not handled for some inputs, there's
+// a lot of index manipulation, that could go out of bound. I tried to catch
+// some, but it worked directly with my input, so it would need more testing !!!
+func compress(moves string) (string, [3]string) {
+	var subs [3]string
+	for len(subs[0]) <= 20 {
+		startIndex := len(subs[0]) + 1
+		for startIndex < len(moves) && moves[startIndex] != ',' {
+			startIndex++
+		}
+		subs[0] = moves[:startIndex]
+		startIndex++
+		subs[1] = ""
+		pattern := "A"
+
+		for startIndex < len(moves) && strings.HasPrefix(moves[startIndex:], subs[0]) {
+			startIndex += len(subs[0]) + 1
+			pattern += ",A"
+		}
+		if startIndex >= len(moves) {
+			continue
+		}
+
+		for len(subs[1]) <= 20 {
+			startIndexLast := startIndex + len(subs[1]) + 1
+			for startIndexLast < len(moves) && moves[startIndexLast] != ',' {
+				startIndexLast++
+			}
+			if startIndexLast >= len(moves) {
+				break
+			}
+			subs[1] = moves[startIndex:startIndexLast]
+			startIndexLast++
+			pattern := pattern + ",B"
+			subs[2] = ""
+			for startIndexLast < len(moves) {
+				if strings.HasPrefix(moves[startIndexLast:], subs[0]) {
+					startIndexLast += len(subs[0]) + 1
+					pattern += ",A"
+				} else if strings.HasPrefix(moves[startIndexLast:], subs[1]) {
+					pattern += ",B"
+					startIndexLast += len(subs[1]) + 1
+				} else {
+					break
+				}
+			}
+			if startIndexLast >= len(moves) {
+				continue
+			}
+
+			for len(subs[2]) <= 20 {
+				pattern := pattern + ",C"
+				index := startIndexLast + len(subs[2]) + 1
+				for index < len(moves) && moves[index] != ',' {
+					index++
+				}
+
+				subs[2] = moves[startIndexLast:index]
+				index++
+
+				for index < len(moves) {
+					if strings.HasPrefix(moves[index:], subs[0]) {
+						index += len(subs[0]) + 1
+						pattern += ",A"
+					} else if strings.HasPrefix(moves[index:], subs[1]) {
+						pattern += ",B"
+						index += len(subs[1]) + 1
+					} else if strings.HasPrefix(moves[index:], subs[2]) {
+						pattern += ",C"
+						index += len(subs[2]) + 1
+					} else {
+						break
+					}
+				}
+				if index >= len(moves) {
+					return pattern, subs
+				}
+			}
+
+		}
+	}
+
+	return "", [3]string{}
+}
+
+func moveOnScaffold(ints []int, mainRoutine string, functions [3]string) int {
 	m := intcode.NewMachine(ints)
 	go m.Run()
 	show := "n"
 	printAndInput(m, mainRoutine)
-	printAndInput(m, A)
-	printAndInput(m, B)
-	printAndInput(m, C)
+	printAndInput(m, functions[0])
+	printAndInput(m, functions[1])
+	printAndInput(m, functions[2])
 	printAndInput(m, show)
 	var last int
 	for {
