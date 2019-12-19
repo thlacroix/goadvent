@@ -16,9 +16,9 @@ func main() {
 	m := intcode.NewMachine(ints)
 	go m.Run()
 	m.AddInput(1)
-	fmt.Println(m.GetOuput())
+	fmt.Println(m.GetOutput())
 	m2 := intcode.NewMachine(ints)
 	go m2.Run()
 	m2.AddInput(2)
-	fmt.Println(m2.GetOuput())
+	fmt.Println(m2.GetOutput())
 }

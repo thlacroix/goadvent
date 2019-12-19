@@ -77,8 +77,8 @@ func paintAndCount(ints []int, initialColor Color) (int, map[Point]Color) {
 		if !ok {
 			break
 		}
-		paintColor = Color(m.GetOuput() + 1)
-		turnDirection = Direction(m.GetOuput())
+		paintColor = Color(m.GetOutput() + 1)
+		turnDirection = Direction(m.GetOutput())
 
 		if currentColor == InitialBlack {
 			painted++

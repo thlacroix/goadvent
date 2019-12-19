@@ -162,7 +162,7 @@ func searchOxygen(m *intcode.Machine, moves int, p Point, world map[Point]Place,
 	// East
 	if d := (Point{p.X + 1, p.Y}); world[d] == WhoKnows {
 		m.AddInput(int(East))
-		s := Status(m.GetOuput())
+		s := Status(m.GetOutput())
 		switch s {
 		case HitWall:
 			world[d] = Wall
@@ -178,14 +178,14 @@ func searchOxygen(m *intcode.Machine, moves int, p Point, world map[Point]Place,
 				return res, o
 			}
 			m.AddInput(int(West))
-			m.GetOuput()
+			m.GetOutput()
 		}
 	}
 
 	// West
 	if d := (Point{p.X - 1, p.Y}); world[d] == WhoKnows {
 		m.AddInput(int(West))
-		s := Status(m.GetOuput())
+		s := Status(m.GetOutput())
 		switch s {
 		case HitWall:
 			world[d] = Wall
@@ -201,14 +201,14 @@ func searchOxygen(m *intcode.Machine, moves int, p Point, world map[Point]Place,
 				return res, o
 			}
 			m.AddInput(int(East))
-			m.GetOuput()
+			m.GetOutput()
 		}
 	}
 
 	// North
 	if d := (Point{p.X, p.Y + 1}); world[d] == WhoKnows {
 		m.AddInput(int(North))
-		s := Status(m.GetOuput())
+		s := Status(m.GetOutput())
 		switch s {
 		case HitWall:
 			world[d] = Wall
@@ -224,14 +224,14 @@ func searchOxygen(m *intcode.Machine, moves int, p Point, world map[Point]Place,
 				return res, o
 			}
 			m.AddInput(int(South))
-			m.GetOuput()
+			m.GetOutput()
 		}
 	}
 
 	// South
 	if d := (Point{p.X, p.Y - 1}); world[d] == WhoKnows {
 		m.AddInput(int(South))
-		s := Status(m.GetOuput())
+		s := Status(m.GetOutput())
 		switch s {
 		case HitWall:
 			world[d] = Wall
@@ -247,7 +247,7 @@ func searchOxygen(m *intcode.Machine, moves int, p Point, world map[Point]Place,
 				return res, o
 			}
 			m.AddInput(int(North))
-			m.GetOuput()
+			m.GetOutput()
 		}
 	}
 

@@ -46,8 +46,8 @@ func (m *Machine) AddInput(i int) bool {
 	}
 }
 
-// GetOuput returns the first available ouput from the Output channel
-func (m *Machine) GetOuput() int {
+// GetOutput returns the first available ouput from the Output channel
+func (m *Machine) GetOutput() int {
 	return <-m.Output
 }
 
@@ -68,7 +68,7 @@ func (m *Machine) GetOutputOrAddInputOrEnd(i int) (int, bool, bool) {
 
 // GetOuputOrEnd returns the first available ouput from the Output channel,
 // and true if the machine exited
-func (m *Machine) GetOuputOrEnd() (int, bool) {
+func (m *Machine) GetOutputOrEnd() (int, bool) {
 	for {
 		select {
 		case o := <-m.Output:

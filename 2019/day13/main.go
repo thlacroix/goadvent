@@ -27,13 +27,13 @@ func countTiles(ints []int) int {
 	go m.Run()
 
 	for {
-		_, end := m.GetOuputOrEnd()
+		_, end := m.GetOutputOrEnd()
 		if end {
 			return count
 		}
-		m.GetOuput()
+		m.GetOutput()
 
-		tile := m.GetOuput()
+		tile := m.GetOutput()
 		if tile == 2 {
 			count++
 		}
@@ -116,8 +116,8 @@ func playGame(ints []int) int {
 			//game.Print()
 			return game.Score
 		}
-		y := m.GetOuput()
-		tile := m.GetOuput()
+		y := m.GetOutput()
+		tile := m.GetOutput()
 
 		if x == -1 {
 			game.Score = tile
