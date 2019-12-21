@@ -36,13 +36,11 @@ func NewBufferedMachine(ints []int, inBuffer, outBuffer int) *Machine {
 // AddInput sends the input on the Input channel and return true
 // If the machine is finished, returns false instead of sending
 func (m *Machine) AddInput(i int) bool {
-	for {
-		select {
-		case m.Input <- i:
-			return true
-		case <-m.Done:
-			return false
-		}
+	select {
+	case m.Input <- i:
+		return true
+	case <-m.Done:
+		return false
 	}
 }
 
@@ -54,28 +52,24 @@ func (m *Machine) GetOutput() int {
 // GetOutputOrAddInputOrEnd either adds and input (and return the first bool as true),
 // get an output, or signal the end of the program (last bool as true)
 func (m *Machine) GetOutputOrAddInputOrEnd(i int) (int, bool, bool) {
-	for {
-		select {
-		case o := <-m.Output:
-			return o, false, false
-		case m.Input <- i:
-			return 0, true, false
-		case <-m.Done:
-			return 0, false, true
-		}
+	select {
+	case o := <-m.Output:
+		return o, false, false
+	case m.Input <- i:
+		return 0, true, false
+	case <-m.Done:
+		return 0, false, true
 	}
 }
 
-// GetOuputOrEnd returns the first available ouput from the Output channel,
+// GetOutputOrEnd returns the first available ouput from the Output channel,
 // and true if the machine exited
 func (m *Machine) GetOutputOrEnd() (int, bool) {
-	for {
-		select {
-		case o := <-m.Output:
-			return o, false
-		case <-m.Done:
-			return 0, true
-		}
+	select {
+	case o := <-m.Output:
+		return o, false
+	case <-m.Done:
+		return 0, true
 	}
 }
 
