@@ -66,7 +66,7 @@ func runMachines(ints []int, N int) int {
 					fmt.Println(y)
 					sentOnce = true
 				}
-			default:
+			case <-time.After(time.Second / (100 * 1000)):
 				// idle detection, by looking at channel lengths for
 				// X consecutive periods of T microseconds
 				idle := true
@@ -82,11 +82,10 @@ func runMachines(ints []int, N int) int {
 				}
 				if idle {
 					idleCount++
-					time.Sleep(time.Second / (100 * 1000))
 				} else {
 					idleCount = 0
 				}
-				if idleCount == 10 {
+				if idleCount == 5 {
 					idleCount = 0
 					if sentOnce && y == lastSent {
 						res <- y

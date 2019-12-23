@@ -84,7 +84,6 @@ func (m *Machine) WithDefaultInput(i int) *Machine {
 
 // Run runs the machine, and sends a signal on the Done chan when done
 func (m *Machine) Run() {
-	gotFirstInput := true // needed for day 23, to wait for consecutive inputs
 	for m.Index < len(m.Ints) {
 		operation := m.Ints[m.Index] % 100
 		switch operation {
@@ -106,20 +105,15 @@ func (m *Machine) Run() {
 			// * If we configure a default input, if we don't have an input in the
 			//   queue, we use the default one, and sleep for T microseconds, to avoid
 			//   overloading the CPU
-			//   Also, if we receive an input, it wil wait for a second one before
-			//   using the default. This doesn't apply for the first input received
 			var input int
-			if m.DefaultInput != 0 && !gotFirstInput {
+			if m.DefaultInput != 0 {
 				select {
 				case input = <-m.Input:
-					gotFirstInput = true
-				default:
+				case <-time.After(time.Second / (10 * 1000)):
 					input = -1
-					time.Sleep(time.Second / (100 * 1000))
 				}
 			} else {
 				input = <-m.Input
-				gotFirstInput = false
 			}
 			m.writeInt(parameters[0], input, modes[0])
 			m.Index += 2
