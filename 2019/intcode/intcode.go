@@ -1,5 +1,7 @@
 package intcode
 
+import "time"
+
 // Mode represent the mode of a parameter defined in the operatioh=n
 type Mode byte
 
@@ -12,12 +14,13 @@ const (
 // Machine is the IntCode program and stores the state
 // The Input and Output chans are used to communicate with the machine
 type Machine struct {
-	Ints   []int
-	Index  int
-	Base   int
-	Input  chan int
-	Output chan int
-	Done   chan bool
+	Ints         []int
+	Index        int
+	Base         int
+	Input        chan int
+	Output       chan int
+	Done         chan bool
+	DefaultInput int
 }
 
 // NewMachine returns a new machine with a copy of the input ints
@@ -73,8 +76,15 @@ func (m *Machine) GetOutputOrEnd() (int, bool) {
 	}
 }
 
+// WithDefaultInput sets the default input to i
+func (m *Machine) WithDefaultInput(i int) *Machine {
+	m.DefaultInput = i
+	return m
+}
+
 // Run runs the machine, and sends a signal on the Done chan when done
 func (m *Machine) Run() {
+	gotFirstInput := true // needed for day 23, to wait for consecutive inputs
 	for m.Index < len(m.Ints) {
 		operation := m.Ints[m.Index] % 100
 		switch operation {
@@ -90,7 +100,27 @@ func (m *Machine) Run() {
 			m.Index += 4
 		case 3:
 			modes, parameters := m.getModesParameters(1)
-			input := <-m.Input
+
+			// Modified for day23:
+			// * If we don't configure a default input, it will wait for an input
+			// * If we configure a default input, if we don't have an input in the
+			//   queue, we use the default one, and sleep for T microseconds, to avoid
+			//   overloading the CPU
+			//   Also, if we receive an input, it wil wait for a second one before
+			//   using the default. This doesn't apply for the first input received
+			var input int
+			if m.DefaultInput != 0 && !gotFirstInput {
+				select {
+				case input = <-m.Input:
+					gotFirstInput = true
+				default:
+					input = -1
+					time.Sleep(time.Second / (100 * 1000))
+				}
+			} else {
+				input = <-m.Input
+				gotFirstInput = false
+			}
 			m.writeInt(parameters[0], input, modes[0])
 			m.Index += 2
 		case 4:
