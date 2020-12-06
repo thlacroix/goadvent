@@ -13,6 +13,7 @@ if [ -z "$AOC_REPO" ]; then export AOC_REPO="$(dirname $0)"; fi
 # * Open the root of this repo in your VISUAL editor (if set)
 # * Move in the new folder and run the code to validate the setup
 function aoc {
+    if [ "$#" -ne "2" ]; then echo "Usage: aoc YEAR DAY"; return 1; fi
     year="$1"
     day="$2"
 
