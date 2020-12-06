@@ -12,45 +12,32 @@ import (
 )
 
 func main() {
-	var passports []map[string]string
-	var currentPassport map[string]string
 	var valid, valid2 int
-	err := helpers.ScanLine("input.txt", func(s string) error {
-		if s == "" {
-			passports = append(passports, currentPassport)
-			if isValid(currentPassport) {
-				valid++
-				if isValid2(currentPassport) {
-					valid2++
-				}
-			}
-			currentPassport = nil
-			return nil
-		}
-		if currentPassport == nil {
-			currentPassport = make(map[string]string, 8)
-		}
-		split := strings.Split(s, " ")
+	err := helpers.ScanGroup("input.txt", func(ss []string) error {
+		passport := make(map[string]string, 8)
 
-		for _, ss := range split {
-			field := strings.Split(ss, ":")
-			if len(field) != 2 {
-				return fmt.Errorf("wrong field %s", ss)
+		for _, s := range ss {
+			split := strings.Split(s, " ")
+
+			for _, field := range split {
+				fieldKV := strings.Split(field, ":")
+				if len(fieldKV) != 2 {
+					return fmt.Errorf("wrong field %s", field)
+				}
+				passport[fieldKV[0]] = fieldKV[1]
 			}
-			currentPassport[field[0]] = field[1]
 		}
+		if isValid(passport) {
+			valid++
+			if isValid2(passport) {
+				valid2++
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
 		log.Fatal(err)
-	}
-	if currentPassport != nil {
-		if isValid(currentPassport) {
-			valid++
-			if isValid2(currentPassport) {
-				valid2++
-			}
-		}
 	}
 	fmt.Println(valid, valid2)
 }
