@@ -13,14 +13,13 @@ const part2Target = 30000000
 func main() {
 	var part1, part2 int
 	part1 = play(input, part1Target)
-	// bruteforcing part2 seems to work well, both run in 1.4s on my machine
-	// will try to visualize to see if there's an easy pattern here
+	// bruteforcing part2 seems to work well, both run in 1.5s and <300MiB memory on my machine
 	part2 = play(input, part2Target)
 	fmt.Println(part1, part2)
 }
 
 func play(start []int, target int) int {
-	mem := make(map[int]int, target)
+	mem := make(map[int]int, target/8)
 
 	for i, n := range start[:len(start)-1] {
 		mem[n] = i
