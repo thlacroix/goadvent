@@ -88,20 +88,21 @@ func (d DeckChan) Score() int {
 	return score
 }
 
+func NewDeckChan(cards []int) DeckChan {
+	d := make(DeckChan, len(cards)*3)
+
+	for _, c := range cards {
+		d <- c
+	}
+
+	return d
+}
+
 func main() {
 	var part1, part2 int
-	player1, player2 := make([]int, 0, 25), make([]int, 0, 25)
-	p1, p2 := make(DeckChan, 100), make(DeckChan, 100)
+	var player1, player2 []int
 	err := helpers.ScanGroup("input.txt", func(ss []string) error {
-		var p []int
-		var c chan int
-		if len(p1) == 0 {
-			p = player1
-			c = p1
-		} else {
-			p = player2
-			c = p2
-		}
+		p := make([]int, 0, 25)
 
 		for _, s := range ss[1:] {
 			v, err := strconv.Atoi(s)
@@ -109,7 +110,12 @@ func main() {
 				return err
 			}
 			p = append(p, v)
-			c <- v
+		}
+
+		if len(player1) == 0 {
+			player1 = p
+		} else {
+			player2 = p
 		}
 		return nil
 	})
@@ -117,8 +123,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	part1 = play(p1.Copy(-1), p2.Copy(-1))
-	_, part2 = play2(p1.Copy(-1), p2.Copy(-1), true)
+	part1 = play(NewDeckChan(player1), NewDeckChan(player2))
+	_, part2 = play2(NewDeckChan(player1), NewDeckChan(player2), true)
 	fmt.Println(part1, part2)
 }
 
