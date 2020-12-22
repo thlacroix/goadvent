@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/list"
 	"fmt"
 	"log"
 	"strconv"
@@ -9,6 +10,8 @@ import (
 	"github.com/thlacroix/goadvent/helpers"
 )
 
+// Deck represents a player deck with all methods necessary for both parts
+// It has been implemented first with a chan (not effecient), then with a container/list (better)
 type Deck interface {
 	Draw() int
 	Add(int)
@@ -16,86 +19,6 @@ type Deck interface {
 	Copy(int) Deck
 	Score() int
 	fmt.Stringer
-}
-
-type DeckChan chan int
-
-func (d DeckChan) Draw() int {
-	return <-d
-}
-
-func (d DeckChan) Add(i int) {
-	d <- i
-}
-
-func (d DeckChan) L() int {
-	return len(d)
-}
-
-func (d DeckChan) Copy(length int) Deck {
-	dc := make(DeckChan, cap(d))
-
-	d <- -1
-	var i int
-	for {
-		v := <-d
-
-		if v == -1 {
-			break
-		}
-
-		d <- v
-		if length < 0 || i < length {
-			dc <- v
-		}
-		i++
-	}
-
-	return dc
-}
-
-func (d DeckChan) String() string {
-	var s strings.Builder
-
-	d <- -1
-
-	for {
-		v := <-d
-
-		if v == -1 {
-			break
-		}
-
-		s.WriteString(fmt.Sprintf("%d+", v))
-		d <- v
-	}
-
-	return s.String()
-}
-
-func (d DeckChan) Score() int {
-	var score int
-
-	close(d)
-
-	L := len(d)
-	var i int
-
-	for v := range d {
-		score += (L - i) * v
-		i++
-	}
-	return score
-}
-
-func NewDeckChan(cards []int) DeckChan {
-	d := make(DeckChan, len(cards)*3)
-
-	for _, c := range cards {
-		d <- c
-	}
-
-	return d
 }
 
 func main() {
@@ -123,8 +46,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	part1 = play(NewDeckChan(player1), NewDeckChan(player2))
-	_, part2 = play2(NewDeckChan(player1), NewDeckChan(player2), true)
+	part1 = play(NewDeckL(player1), NewDeckL(player2))
+	_, part2 = play2(NewDeckL(player1), NewDeckL(player2), true)
 	fmt.Println(part1, part2)
 }
 
@@ -226,5 +149,163 @@ playLoop:
 	}
 
 	return winner, winnerDeck.Score()
+}
 
+// =================== DeckL =====================
+
+// DeckL implements Deck with a container/list
+type DeckL struct {
+	list *list.List
+}
+
+func NewDeckL(cards []int) DeckL {
+	d := DeckL{list: list.New()}
+
+	for _, c := range cards {
+		d.list.PushBack(c)
+	}
+
+	return d
+}
+
+func (d DeckL) Draw() int {
+	c := d.list.Front()
+	d.list.Remove(c)
+	return c.Value.(int)
+}
+
+func (d DeckL) Add(i int) {
+	d.list.PushBack(i)
+}
+
+func (d DeckL) L() int {
+	return d.list.Len()
+}
+
+func (d DeckL) Copy(length int) Deck {
+	dc := DeckL{list: list.New()}
+
+	e := dc.list.Front()
+
+	for i := 0; i < length; i++ {
+		if e == nil {
+			break
+		}
+		dc.list.PushBack(e.Value)
+
+		e = e.Next()
+	}
+
+	return dc
+}
+
+func (d DeckL) String() string {
+	var s strings.Builder
+
+	e := d.list.Front()
+
+	for e != nil {
+		s.WriteString(fmt.Sprintf("%v", e.Value))
+		e = e.Next()
+	}
+
+	return s.String()
+}
+
+func (d DeckL) Score() int {
+	var score int
+
+	L := d.L()
+	e := d.list.Front()
+
+	var i int
+	for e != nil {
+		score += (L - i) * e.Value.(int)
+		i++
+		e = e.Next()
+	}
+	return score
+}
+
+// =================== DeckChan =====================
+
+// DeckChan implements Deck with a channel
+type DeckChan chan int
+
+func (d DeckChan) Draw() int {
+	return <-d
+}
+
+func (d DeckChan) Add(i int) {
+	d <- i
+}
+
+func (d DeckChan) L() int {
+	return len(d)
+}
+
+func (d DeckChan) Copy(length int) Deck {
+	dc := make(DeckChan, cap(d))
+
+	d <- -1
+	var i int
+	for {
+		v := <-d
+
+		if v == -1 {
+			break
+		}
+
+		d <- v
+		if i < length {
+			dc <- v
+		}
+		i++
+	}
+
+	return dc
+}
+
+func (d DeckChan) String() string {
+	var s strings.Builder
+
+	d <- -1
+
+	for {
+		v := <-d
+
+		if v == -1 {
+			break
+		}
+
+		s.WriteString(fmt.Sprintf("%d+", v))
+		d <- v
+	}
+
+	return s.String()
+}
+
+func (d DeckChan) Score() int {
+	var score int
+
+	close(d)
+
+	L := len(d)
+	var i int
+
+	for v := range d {
+		score += (L - i) * v
+		i++
+	}
+	return score
+}
+
+func NewDeckChan(cards []int) DeckChan {
+	d := make(DeckChan, len(cards)*3)
+
+	for _, c := range cards {
+		d <- c
+	}
+
+	return d
 }
